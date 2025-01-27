@@ -1,22 +1,22 @@
 {
   "History": {
     "part1": {
-      "quiz1": "subjects/history/part1/history1quiz.pdf",
-      "quiz2": "subjects/history/part1/history2quiz.pdf"
+      "quiz1": "subjects/History/part1/history1quiz.pdf",
+      "quiz2": "subjects/History/part1/history1quiz.pdf"
     },
     "part2": {
-      "quiz1": "subjects/history/part2/history(2)1quiz.pdf",
-      "quiz2": "subjects/history/part2/history(2)2quiz.pdf"
+      "quiz1": "subjects/History/part2/history1quiz.pdf",
+      "quiz2": "subjects/History/part2/history1quiz.pdf"
     }
   },
   "Math": {
     "part1": {
-      "quiz1": "subjects/math/part1/math1quiz (1).pdf",
-      "quiz2": "subjects/math/part1/math1quiz (2).pdf"
+      "quiz1": "subjects/Math/part1/math1quiz (1).pdf",
+      "quiz2": "subjects/Math/part1/math1quiz (2).pdf"
     },
     "part2": {
-      "quiz1": "subjects/math/part2/math2 (1).pdf",
-      "quiz2": "subjects/math/part2/math2 (2).pdf"
+      "quiz1": "subjects/Math/part2/math2 (1).pdf",
+      "quiz2": "subjects/Math/part2/math2 (2).pdf"
     }
   }
 }
