@@ -5,53 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mock Test Quiz</title>
   <style>
-    /* CSS स्टाइल */
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
-      padding: 0;
+      margin: 0;
+      padding: 20px;
       background-color: #f4f4f9;
     }
 
     h1 {
       text-align: center;
       color: #333;
+      margin-bottom: 20px;
     }
 
     select, iframe {
       width: 100%;
-      margin: 10px 0;
+      max-width: 600px;
+      margin: 10px auto;
       padding: 10px;
+      display: block;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
 
-    button {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      background-color: #007bff;
-      color: white;
+    iframe {
+      height: 600px; /* PDF के लिए उचित ऊंचाई */
       border: none;
+      overflow: auto;
       border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
     }
 
-    button:hover {
-      background-color: #0056b3;
+    iframe[oncontextmenu="return false;"] {
+      pointer-events: none; /* राइट-क्लिक को निष्क्रिय करता है */
     }
 
     #loader {
       display: none;
       text-align: center;
+      font-size: 16px;
+      color: #666;
     }
   </style>
 </head>
 <body>
   <h1>Mock Test Quiz</h1>
 
-  <!-- ड्रॉपडाउन मेनू -->
   <select id="subjectDropdown">
     <option>Select Subject</option>
   </select>
@@ -64,10 +62,15 @@
     <option>Select Quiz</option>
   </select>
 
-  <!-- क्विज़ दिखाने के लिए iframe -->
-  <iframe id="quizIframe" height="500px"></iframe>
+  <!-- PDF दिखाने के लिए iframe -->
+  <center>
+    <iframe 
+      id="quizIframe" 
+      sandbox="allow-scripts allow-same-origin" 
+      oncontextmenu="return false;">
+    </iframe>
+  </center>
 
-  <!-- डेटा लोडर -->
   <div id="loader">Loading...</div>
 
   <script>
@@ -109,7 +112,7 @@
                 partDropdown.appendChild(option);
               }
               loader.style.display = "none";
-            }, 500); // थोड़ा विलंब (डेमो के लिए)
+            }, 500); 
           }
         });
 
@@ -132,14 +135,14 @@
                 quizDropdown.appendChild(option);
               }
               loader.style.display = "none";
-            }, 500); // थोड़ा विलंब (डेमो के लिए)
+            }, 500);
           }
         });
 
         quizDropdown.addEventListener("change", () => {
           const selectedQuiz = quizDropdown.value;
           if (selectedQuiz !== "Select Quiz") {
-            iframe.src = selectedQuiz;
+            iframe.src = selectedQuiz; // PDF फाइल का URL सेट करें
           }
         });
       })
