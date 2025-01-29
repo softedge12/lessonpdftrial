@@ -81,18 +81,18 @@
       color: #333;
     }
 
-  #pdfViewer {
-  margin-top: 20px;
-  width: 100%;
-  max-height: 90vh;  /* 90% of the viewport height */
-  border: 1px solid #ddd;
-  display: none;
-  overflow: auto;  /* Allows scrolling if the content overflows */
-  background-color: #fff;
-  margin-top: 50px;
-  text-align: center;
-}
-
+    #pdfViewer {
+      margin-top: 20px;
+      width: 100%;
+      height: 80vh;  /* 80% of the viewport height */
+      max-height: 90vh; /* Maximum height */
+      border: 1px solid #ddd;
+      display: block; /* Ensure it's block-level */
+      overflow: auto;  /* Allow scrolling if content overflows */
+      background-color: #fff;
+      margin-top: 50px;
+      text-align: center;
+    }
 
     .view-pdf-btn {
       background-color: #007bff;
@@ -151,34 +151,29 @@
 
   <script>
     const githubBaseURL = "https://softedge12.github.io/lessonpdftrial/subjects/";
-    const jsonURL = "https://softedge12.github.io/lessonpdftrial/data.json"; // Updated to use data.json
 
     function startToView() {
       document.getElementById("loadingText").style.display = "block";
       document.getElementById("startButton").style.display = "none";
-      fetchJSONData();
-    }
 
-    function fetchJSONData() {
-      fetch(jsonURL)
+      fetch('data.json')  // Fetch your JSON file here
         .then(response => response.json())
-        .then(data => loadSubjectDropdown(data))
-        .catch(error => console.error('Error fetching JSON:', error));
+        .then(data => {
+          const subjects = data.subjects.map(subject => subject.name);
+          loadSubjectDropdown(subjects);
+        });
     }
 
-    function loadSubjectDropdown(data) {
+    function loadSubjectDropdown(subjectList) {
       document.getElementById("loadingText").style.display = "none";
       var subjectDropdown = document.getElementById("subjectDropdown");
       subjectDropdown.innerHTML = '<option value="">Select Subject</option>';
-
-      // Iterate through subjects in the JSON data
-      data.subjects.forEach(function(subject) {
+      subjectList.forEach(function (subject) {
         var option = document.createElement("option");
-        option.value = subject.name;
-        option.textContent = subject.name;
+        option.value = subject;
+        option.textContent = subject;
         subjectDropdown.appendChild(option);
       });
-
       document.getElementById("dropdowns").style.display = "flex";
     }
 
@@ -186,10 +181,10 @@
       var subject = document.getElementById("subjectDropdown").value;
       document.getElementById("loadingText").style.display = "block";
 
-      fetch(jsonURL)
+      fetch('data.json')
         .then(response => response.json())
         .then(data => {
-          const chapters = data.subjects.find(subj => subj.name === subject)?.chapters || [];
+          const chapters = data.subjects.find(s => s.name === subject).chapters.map(chapter => chapter.name);
           loadChapterDropdown(chapters);
         });
     }
@@ -198,10 +193,10 @@
       document.getElementById("loadingText").style.display = "none";
       var chapterDropdown = document.getElementById("chapterDropdown");
       chapterDropdown.innerHTML = '<option value="">Select Chapter</option>';
-      chapterList.forEach(function(chapter) {
+      chapterList.forEach(function (chapter) {
         var option = document.createElement("option");
-        option.value = chapter.name;
-        option.textContent = chapter.name;
+        option.value = chapter;
+        option.textContent = chapter;
         chapterDropdown.appendChild(option);
       });
     }
@@ -211,12 +206,12 @@
       var chapter = document.getElementById("chapterDropdown").value;
       document.getElementById("loadingText").style.display = "block";
 
-      fetch(jsonURL)
+      fetch('data.json')
         .then(response => response.json())
         .then(data => {
           const pdfs = data.subjects
-            .find(subj => subj.name === subject)
-            ?.chapters.find(chap => chap.name === chapter)?.pdfs || [];
+            .find(s => s.name === subject).chapters
+            .find(ch => ch.name === chapter).pdfs;
           loadPDFDropdown(pdfs);
         });
     }
@@ -225,7 +220,7 @@
       document.getElementById("loadingText").style.display = "none";
       var pdfDropdown = document.getElementById("pdfDropdown");
       pdfDropdown.innerHTML = '<option value="">Select PDF</option>';
-      pdfList.forEach(function(pdf) {
+      pdfList.forEach(function (pdf) {
         var option = document.createElement("option");
         option.value = pdf;
         option.textContent = pdf;
@@ -250,7 +245,6 @@
     function displayPDF(pdfUrl) {
       document.getElementById("loadingText").style.display = "none";
       var pdfViewer = document.getElementById("pdfViewer");
-
       if (pdfUrl) {
         pdfViewer.style.display = "block";
         loadPDFWithPDFjs(pdfUrl);
@@ -262,7 +256,6 @@
 
     function loadPDFWithPDFjs(pdfUrl) {
       const container = document.getElementById("pdfViewer");
-      container.innerHTML = "";  // Clear previous PDF
 
       pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
         let pageNum = 1;
@@ -278,14 +271,24 @@
             canvas.height = viewport.height;
             canvas.width = viewport.width;
 
+            // Adjust canvas size based on container
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+
+            const scaleFactorWidth = containerWidth / canvas.width;
+            const scaleFactorHeight = containerHeight / canvas.height;
+
+            const scaleFactor = Math.min(scaleFactorWidth, scaleFactorHeight);  // Scale to fit the container
+
+            canvas.width = canvas.width * scaleFactor;
+            canvas.height = canvas.height * scaleFactor;
+
             page.render({
               canvasContext: ctx,
-              viewport: viewport
+              viewport: page.getViewport({ scale: scaleFactor })
             }).promise.then(() => {
-              container.appendChild(canvas);
-              if (pageNum < totalPages) {
-                renderPage(pageNum + 1);
-              }
+              container.innerHTML = '';  // Clear any existing content
+              container.appendChild(canvas);  // Add the new canvas
             });
           });
         }
