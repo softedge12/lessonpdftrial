@@ -88,16 +88,6 @@
       border: 1px solid #ddd;
       display: none;
       margin-top: 50px;
-      overflow: auto;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    iframe {
-      border: none;
-      width: 80%;
-      height: 100%;
     }
 
     .view-pdf-btn {
@@ -151,22 +141,27 @@
     <button class="view-pdf-btn" onclick="viewPDF()">View PDF</button>
   </div>
 
-  <div id="pdfViewer">
-    <iframe id="pdfFrame" src="" width="100%" height="100%"></iframe>
-  </div>
+  <div id="pdfViewer"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 
   <script>
+    const githubBaseURL = "https://softedge12.github.io/lessonpdftrial/subjects/";
+
     function startToView() {
       document.getElementById("loadingText").style.display = "block";
       document.getElementById("startButton").style.display = "none";
-      google.script.run.withSuccessHandler(loadSubjectDropdown).getFolderList();
+
+      // Manually loaded subjects for demonstration
+      const subjects = ["Mathematics", "Science"];
+      loadSubjectDropdown(subjects);
     }
 
     function loadSubjectDropdown(subjectList) {
       document.getElementById("loadingText").style.display = "none";
       var subjectDropdown = document.getElementById("subjectDropdown");
       subjectDropdown.innerHTML = '<option value="">Select Subject</option>';
-      subjectList.forEach(function(subject) {
+      subjectList.forEach(function (subject) {
         var option = document.createElement("option");
         option.value = subject;
         option.textContent = subject;
@@ -178,14 +173,17 @@
     function onSubjectChange() {
       var subject = document.getElementById("subjectDropdown").value;
       document.getElementById("loadingText").style.display = "block";
-      google.script.run.withSuccessHandler(loadChapterDropdown).getChapters(subject);
+      
+      // Example chapters for simplicity
+      const chapters = subject === "Mathematics" ? ["Algebra", "Geometry"] : ["Physics", "Chemistry"];
+      loadChapterDropdown(chapters);
     }
 
     function loadChapterDropdown(chapterList) {
       document.getElementById("loadingText").style.display = "none";
       var chapterDropdown = document.getElementById("chapterDropdown");
       chapterDropdown.innerHTML = '<option value="">Select Chapter</option>';
-      chapterList.forEach(function(chapter) {
+      chapterList.forEach(function (chapter) {
         var option = document.createElement("option");
         option.value = chapter;
         option.textContent = chapter;
@@ -197,14 +195,15 @@
       var subject = document.getElementById("subjectDropdown").value;
       var chapter = document.getElementById("chapterDropdown").value;
       document.getElementById("loadingText").style.display = "block";
-      google.script.run.withSuccessHandler(loadPDFDropdown).getPDFs(subject, chapter);
+      
+     
     }
 
     function loadPDFDropdown(pdfList) {
       document.getElementById("loadingText").style.display = "none";
       var pdfDropdown = document.getElementById("pdfDropdown");
       pdfDropdown.innerHTML = '<option value="">Select PDF</option>';
-      pdfList.forEach(function(pdf) {
+      pdfList.forEach(function (pdf) {
         var option = document.createElement("option");
         option.value = pdf;
         option.textContent = pdf;
@@ -216,8 +215,14 @@
       var subject = document.getElementById("subjectDropdown").value;
       var chapter = document.getElementById("chapterDropdown").value;
       var pdfName = document.getElementById("pdfDropdown").value;
-      document.getElementById("loadingText").style.display = "block";
-      google.script.run.withSuccessHandler(displayPDF).getPDFUrl(subject, chapter, pdfName);
+
+      if (!subject || !chapter || !pdfName) {
+        alert("Please select Subject, Chapter, and PDF.");
+        return;
+      }
+
+      var pdfUrl = `${githubBaseURL}${subject}/${chapter}/${pdfName}`;
+      displayPDF(pdfUrl);
     }
 
     function displayPDF(pdfUrl) {
@@ -225,12 +230,43 @@
       var pdfViewer = document.getElementById("pdfViewer");
       if (pdfUrl) {
         pdfViewer.style.display = "block";
-        document.getElementById("pdfFrame").src = pdfUrl;
+        loadPDFWithPDFjs(pdfUrl);
       } else {
         pdfViewer.style.display = "none";
+        alert("PDF File Not Found!");
       }
     }
-  </script>
 
+    function loadPDFWithPDFjs(pdfUrl) {
+      const container = document.getElementById("pdfViewer");
+
+      pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+        let pageNum = 1;
+        let totalPages = pdf.numPages;
+
+        function renderPage(num) {
+          pdf.getPage(num).then(page => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const scale = 1.5;
+            const viewport = page.getViewport({ scale });
+
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            page.render({
+              canvasContext: ctx,
+              viewport: viewport
+            }).promise.then(() => {
+              container.innerHTML = '';
+              container.appendChild(canvas);
+            });
+          });
+        }
+
+        renderPage(pageNum);
+      });
+    }
+  </script>
 </body>
 </html>
