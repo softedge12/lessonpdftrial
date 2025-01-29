@@ -150,10 +150,7 @@
     function startToView() {
       document.getElementById("loadingText").style.display = "block";
       document.getElementById("startButton").style.display = "none";
-
-      // Manually loaded subjects for demonstration
-      
-      loadSubjectDropdown(subjects);
+      google.script.run.withSuccessHandler(loadSubjectDropdown).getFolderList();
     }
 
     function loadSubjectDropdown(subjectList) {
@@ -172,10 +169,7 @@
     function onSubjectChange() {
       var subject = document.getElementById("subjectDropdown").value;
       document.getElementById("loadingText").style.display = "block";
-      
-      // Example chapters for simplicity
-     
-      loadChapterDropdown(chapters);
+      google.script.run.withSuccessHandler(loadChapterDropdown).getChapters(subject);
     }
 
     function loadChapterDropdown(chapterList) {
@@ -194,10 +188,7 @@
       var subject = document.getElementById("subjectDropdown").value;
       var chapter = document.getElementById("chapterDropdown").value;
       document.getElementById("loadingText").style.display = "block";
-      
-      // Example PDFs for simplicity
-    
-      loadPDFDropdown(pdfs);
+      google.script.run.withSuccessHandler(loadPDFDropdown).getPDFs(subject, chapter);
     }
 
     function loadPDFDropdown(pdfList) {
