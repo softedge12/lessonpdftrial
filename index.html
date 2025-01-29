@@ -87,9 +87,13 @@
       height: 80vh; /* 80% of the viewport height */
       border: 1px solid #ddd;
       display: none;
-      overflow: auto;
       background-color: #fff;
       text-align: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
     }
 
     .view-pdf-btn {
@@ -143,7 +147,9 @@
     <button class="view-pdf-btn" onclick="viewPDF()">View PDF</button>
   </div>
 
-  <div id="pdfViewer"></div>
+  <div id="pdfViewer">
+    <canvas id="pdfCanvas"></canvas>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 
@@ -169,7 +175,6 @@
       var subjectDropdown = document.getElementById("subjectDropdown");
       subjectDropdown.innerHTML = '<option value="">Select Subject</option>';
 
-      // Iterate through subjects in the JSON data
       data.subjects.forEach(function(subject) {
         var option = document.createElement("option");
         option.value = subject.name;
@@ -248,49 +253,36 @@
     function displayPDF(pdfUrl) {
       document.getElementById("loadingText").style.display = "none";
       var pdfViewer = document.getElementById("pdfViewer");
+      var canvas = document.getElementById("pdfCanvas");
 
       if (pdfUrl) {
         pdfViewer.style.display = "block";
-        loadPDFWithPDFjs(pdfUrl);
+        renderPDF(pdfUrl, canvas);
       } else {
         pdfViewer.style.display = "none";
         alert("PDF File Not Found!");
       }
     }
 
-    function loadPDFWithPDFjs(pdfUrl) {
-      const container = document.getElementById("pdfViewer");
-      container.innerHTML = "";  // Clear previous PDF
+    function renderPDF(pdfUrl, canvas) {
+  pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+    pdf.getPage(1).then(function(page) {
+      var context = canvas.getContext('2d');
+      var scale = 3; // स्केल को बढ़ाया गया (3 = 300% पर सेट किया है)
+      var viewport = page.getViewport({ scale: scale });
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
 
-      pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-        let pageNum = 1;
-        let totalPages = pdf.numPages;
-
-        function renderPage(num) {
-          pdf.getPage(num).then(page => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const scale = 1.5;
-            const viewport = page.getViewport({ scale });
-
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            page.render({
-              canvasContext: ctx,
-              viewport: viewport
-            }).promise.then(() => {
-              container.appendChild(canvas);
-              if (pageNum < totalPages) {
-                renderPage(pageNum + 1);
-              }
-            });
-          });
-        }
-
-        renderPage(pageNum);
+      page.render({
+        canvasContext: context,
+        viewport: viewport
       });
-    }
+    });
+  }).catch(function(error) {
+    alert("Error loading PDF: " + error.message);
+  });
+}
+
   </script>
 </body>
 </html>
