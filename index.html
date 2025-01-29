@@ -47,7 +47,6 @@
       font-weight: bold;
     }
 
-    /* Gradient animation */
     @keyframes gradientAnimation {
       0% {
         background-position: 0% 50%;
@@ -144,6 +143,8 @@
 
   <div id="pdfViewer"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+
   <script>
     const githubBaseURL = "https://softedge12.github.io/lessonpdftrial/subjects/";
 
@@ -231,11 +232,42 @@
       var pdfViewer = document.getElementById("pdfViewer");
       if (pdfUrl) {
         pdfViewer.style.display = "block";
-        pdfViewer.innerHTML = `<center><iframe src="${pdfUrl}" width="100%" height="700" style="border: none;" oncontextmenu="return false;" allowfullscreen></iframe></center>`;
+        loadPDFWithPDFjs(pdfUrl);
       } else {
         pdfViewer.style.display = "none";
         alert("PDF File Not Found!");
       }
+    }
+
+    function loadPDFWithPDFjs(pdfUrl) {
+      const container = document.getElementById("pdfViewer");
+
+      pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+        let pageNum = 1;
+        let totalPages = pdf.numPages;
+
+        function renderPage(num) {
+          pdf.getPage(num).then(page => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const scale = 1.5;
+            const viewport = page.getViewport({ scale });
+
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            page.render({
+              canvasContext: ctx,
+              viewport: viewport
+            }).promise.then(() => {
+              container.innerHTML = '';
+              container.appendChild(canvas);
+            });
+          });
+        }
+
+        renderPage(pageNum);
+      });
     }
   </script>
 </body>
