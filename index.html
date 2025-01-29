@@ -47,17 +47,10 @@
       font-weight: bold;
     }
 
-    /* Gradient animation */
     @keyframes gradientAnimation {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .dropdown-container {
@@ -145,87 +138,106 @@
   <div id="pdfViewer"></div>
 
   <script>
-    const githubBaseURL = "https://softedge12.github.io/lessonpdftrial/subjects/";
+    const DATA_URL = "./data.json";
 
     function startToView() {
       document.getElementById("loadingText").style.display = "block";
       document.getElementById("startButton").style.display = "none";
-      google.script.run.withSuccessHandler(loadSubjectDropdown).getFolderList();
+
+      fetch(DATA_URL)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data); // Debugging: Check if data is loaded correctly
+          loadSubjectDropdown(data.subjects);
+        })
+        .catch(error => {
+          console.error("Error loading data:", error);
+          document.getElementById("loadingText").style.display = "none";
+        });
     }
 
     function loadSubjectDropdown(subjectList) {
       document.getElementById("loadingText").style.display = "none";
-      var subjectDropdown = document.getElementById("subjectDropdown");
+      const subjectDropdown = document.getElementById("subjectDropdown");
       subjectDropdown.innerHTML = '<option value="">Select Subject</option>';
-      subjectList.forEach(function (subject) {
-        var option = document.createElement("option");
-        option.value = subject;
-        option.textContent = subject;
-        subjectDropdown.appendChild(option);
-      });
-      document.getElementById("dropdowns").style.display = "flex";
+      
+      if (subjectList && subjectList.length > 0) {
+        subjectList.forEach(subject => {
+          const option = document.createElement("option");
+          option.value = subject.name;
+          option.textContent = subject.name;
+          subjectDropdown.appendChild(option);
+        });
+        document.getElementById("dropdowns").style.display = "flex";
+      } else {
+        console.log("No subjects available");
+      }
     }
 
     function onSubjectChange() {
-      var subject = document.getElementById("subjectDropdown").value;
-      document.getElementById("loadingText").style.display = "block";
-      google.script.run.withSuccessHandler(loadChapterDropdown).getChapters(subject);
+      const subject = document.getElementById("subjectDropdown").value;
+      if (!subject) return;
+      
+      fetch(DATA_URL)
+        .then(response => response.json())
+        .then(data => {
+          const selectedSubject = data.subjects.find(s => s.name === subject);
+          loadChapterDropdown(selectedSubject ? selectedSubject.chapters : []);
+        });
     }
 
     function loadChapterDropdown(chapterList) {
-      document.getElementById("loadingText").style.display = "none";
-      var chapterDropdown = document.getElementById("chapterDropdown");
+      const chapterDropdown = document.getElementById("chapterDropdown");
       chapterDropdown.innerHTML = '<option value="">Select Chapter</option>';
-      chapterList.forEach(function (chapter) {
-        var option = document.createElement("option");
-        option.value = chapter;
-        option.textContent = chapter;
-        chapterDropdown.appendChild(option);
-      });
+      if (chapterList && chapterList.length > 0) {
+        chapterList.forEach(chapter => {
+          const option = document.createElement("option");
+          option.value = chapter.name;
+          option.textContent = chapter.name;
+          chapterDropdown.appendChild(option);
+        });
+      } else {
+        console.log("No chapters available for this subject");
+      }
     }
 
     function onChapterChange() {
-      var subject = document.getElementById("subjectDropdown").value;
-      var chapter = document.getElementById("chapterDropdown").value;
-      document.getElementById("loadingText").style.display = "block";
-      google.script.run.withSuccessHandler(loadPDFDropdown).getPDFs(subject, chapter);
+      const subject = document.getElementById("subjectDropdown").value;
+      const chapter = document.getElementById("chapterDropdown").value;
+      if (!chapter) return;
+      
+      fetch(DATA_URL)
+        .then(response => response.json())
+        .then(data => {
+          const selectedSubject = data.subjects.find(s => s.name === subject);
+          const selectedChapter = selectedSubject.chapters.find(c => c.name === chapter);
+          loadPDFDropdown(selectedChapter ? selectedChapter.pdfs : []);
+        });
     }
 
     function loadPDFDropdown(pdfList) {
-      document.getElementById("loadingText").style.display = "none";
-      var pdfDropdown = document.getElementById("pdfDropdown");
+      const pdfDropdown = document.getElementById("pdfDropdown");
       pdfDropdown.innerHTML = '<option value="">Select PDF</option>';
-      pdfList.forEach(function (pdf) {
-        var option = document.createElement("option");
-        option.value = pdf;
-        option.textContent = pdf;
-        pdfDropdown.appendChild(option);
-      });
+      if (pdfList && pdfList.length > 0) {
+        pdfList.forEach(pdf => {
+          const option = document.createElement("option");
+          option.value = pdf;
+          option.textContent = pdf;
+          pdfDropdown.appendChild(option);
+        });
+      } else {
+        console.log("No PDFs available for this chapter");
+      }
     }
 
     function viewPDF() {
-      var subject = document.getElementById("subjectDropdown").value;
-      var chapter = document.getElementById("chapterDropdown").value;
-      var pdfName = document.getElementById("pdfDropdown").value;
-
-      if (!subject || !chapter || !pdfName) {
-        alert("Please select Subject, Chapter, and PDF.");
-        return;
-      }
-
-      var pdfUrl = `${githubBaseURL}${subject}/${chapter}/${pdfName}`;
-      displayPDF(pdfUrl);
-    }
-
-    function displayPDF(pdfUrl) {
-      document.getElementById("loadingText").style.display = "none";
-      var pdfViewer = document.getElementById("pdfViewer");
-      if (pdfUrl) {
+      const pdfName = document.getElementById("pdfDropdown").value;
+      if (pdfName) {
+        const pdfViewer = document.getElementById("pdfViewer");
         pdfViewer.style.display = "block";
-        pdfViewer.innerHTML = `<center><iframe src="${pdfUrl}" width="100%" height="700" style="border: none;" oncontextmenu="return false;" allowfullscreen></iframe></center>`;
+        pdfViewer.innerHTML = `<center><iframe src="./${pdfName}" width="100%" height="700" style="border: none; overflow: auto;" oncontextmenu="return false;"></iframe></center>`;
       } else {
-        pdfViewer.style.display = "none";
-        alert("PDF File Not Found!");
+        console.log("No PDF selected");
       }
     }
   </script>
