@@ -5,7 +5,7 @@
       "chapters": [
         {
           "name": "Algebra",
-          "pdfs": ["algebra1", "algebra2.pdf"]
+          "pdfs": ["algebra1.pdf", "algebra2.pdf"]
         },
         {
           "name": "Geometry",
