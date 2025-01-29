@@ -81,17 +81,18 @@
       color: #333;
     }
 
-   #pdfViewer {
+  #pdfViewer {
   margin-top: 20px;
-  width: 80%;
-  height: 1000px;  /* यहां पीडीएफ की ऊंचाई बढ़ाई गई है */
+  width: 100%;
+  max-height: 90vh;  /* 90% of the viewport height */
   border: 1px solid #ddd;
   display: none;
-  overflow: auto; /* Scrollbar if more than one page */
+  overflow: auto;  /* Allows scrolling if the content overflows */
   background-color: #fff;
   margin-top: 50px;
   text-align: center;
 }
+
 
     .view-pdf-btn {
       background-color: #007bff;
