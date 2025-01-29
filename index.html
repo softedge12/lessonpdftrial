@@ -3,150 +3,221 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mock Test Quiz</title>
+  <title>PDF Viewer</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      background-color: #e0f7fa;
       margin: 0;
-      padding: 20px;
-      background-color: #f4f4f9;
+      padding: 0;
+      box-sizing: border-box;
+      padding-top: 80px;
     }
 
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-    select, iframe {
-      width: 100%;
-      max-width: 600px;
-      margin: 10px auto;
-      padding: 10px;
-      display: block;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    iframe {
-      height: 600px; /* PDF के लिए उचित ऊंचाई */
+    .animated-button {
+      background-color: #007bff;
+      padding: 15px 30px;
+      font-size: 20px;
+      color: white;
       border: none;
-      overflow: auto;
       border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 20px;
     }
 
-    iframe[oncontextmenu="return false;"] {
-      pointer-events: none; /* राइट-क्लिक को निष्क्रिय करता है */
+    .animated-button:hover {
+      background-color: #008cff;
     }
 
-    #loader {
+    #loadingText {
       display: none;
-      text-align: center;
+      font-size: 24px;
+      margin-top: 20px;
+      animation: gradientAnimation 2s infinite;
+      background: linear-gradient(45deg, #ff6ec7, #ff8a00, #ffd700, #00bcd4);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      color: transparent;
+      font-weight: bold;
+    }
+
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .dropdown-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .dropdown-container select {
+      padding: 10px;
       font-size: 16px;
-      color: #666;
+      margin: 10px;
+      border-radius: 5px;
+      width: 250px;
+    }
+
+    .dropdown-header {
+      font-weight: bold;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    #pdfViewer {
+      margin-top: 20px;
+      width: 100%;
+      height: 700px;
+      border: 1px solid #ddd;
+      display: none;
+      margin-top: 50px;
+    }
+
+    .view-pdf-btn {
+      background-color: #007bff;
+      padding: 15px 30px;
+      font-size: 18px;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 20px;
+      width: 250px;
+    }
+
+    .view-pdf-btn:hover {
+      background-color: #008cff;
+    }
+
+    @media (max-width: 768px) {
+      .dropdown-container select {
+        width: 70%;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Mock Test Quiz</h1>
+  <div class="marquee-container">
+    <marquee><a href="https://www.sarkarifile.com/" target="_blank" style="color: blue; text-decoration: none;">SARKARIFILE.COM</a></marquee>
+  </div>
 
-  <select id="subjectDropdown">
-    <option>Select Subject</option>
-  </select>
+  <button class="animated-button" id="startButton" onclick="startToView()">Start to View</button>
+  <div id="loadingText">Loading Data...</div>
 
-  <select id="partDropdown" disabled>
-    <option>Select Part</option>
-  </select>
+  <div id="dropdowns" class="dropdown-container" style="display:none;">
+    <div class="dropdown-header">Select Subject</div>
+    <select id="subjectDropdown" onchange="onSubjectChange()">
+      <option value="">Select Subject</option>
+    </select>
 
-  <select id="quizDropdown" disabled>
-    <option>Select Quiz</option>
-  </select>
+    <div class="dropdown-header">Select Chapter</div>
+    <select id="chapterDropdown" onchange="onChapterChange()">
+      <option value="">Select Chapter</option>
+    </select>
 
-  <!-- PDF दिखाने के लिए iframe -->
-  <center>
-    <iframe 
-      id="quizIframe" 
-      sandbox="allow-scripts allow-same-origin" 
-      oncontextmenu="return false;">
-    </iframe>
-  </center>
+    <div class="dropdown-header">Select PDF</div>
+    <select id="pdfDropdown">
+      <option value="">Select PDF</option>
+    </select>
 
-  <div id="loader">Loading...</div>
+    <button class="view-pdf-btn" onclick="viewPDF()">View PDF</button>
+  </div>
+
+  <div id="pdfViewer"></div>
 
   <script>
-    // JSON फाइल से डेटा लोड करें
-    fetch("folder_structure.json")
-      .then((response) => response.json())
-      .then((data) => {
-        const subjectDropdown = document.getElementById("subjectDropdown");
-        const partDropdown = document.getElementById("partDropdown");
-        const quizDropdown = document.getElementById("quizDropdown");
-        const loader = document.getElementById("loader");
-        const iframe = document.getElementById("quizIframe");
+    const DATA_URL = "./data.json";
 
-        // विषय लोड करें
-        for (const subject in data) {
-          const option = document.createElement("option");
-          option.value = subject;
-          option.textContent = subject;
-          subjectDropdown.appendChild(option);
-        }
+    function startToView() {
+      document.getElementById("loadingText").style.display = "block";
+      document.getElementById("startButton").style.display = "none";
 
-        subjectDropdown.addEventListener("change", () => {
-          const selectedSubject = subjectDropdown.value;
-          partDropdown.innerHTML = "<option>Select Part</option>";
-          quizDropdown.innerHTML = "<option>Select Quiz</option>";
-          quizDropdown.disabled = true;
-          iframe.src = "";
-          if (selectedSubject !== "Select Subject") {
-            loader.style.display = "block";
-            partDropdown.disabled = false;
-
-            // पार्ट्स लोड करें
-            setTimeout(() => {
-              const parts = data[selectedSubject];
-              for (const part in parts) {
-                const option = document.createElement("option");
-                option.value = part;
-                option.textContent = part;
-                partDropdown.appendChild(option);
-              }
-              loader.style.display = "none";
-            }, 500); 
-          }
+      fetch(DATA_URL)
+        .then(response => response.json())
+        .then(data => loadSubjectDropdown(data.subjects))
+        .catch(error => {
+          console.error("Error loading data:", error);
+          document.getElementById("loadingText").style.display = "none";
         });
+    }
 
-        partDropdown.addEventListener("change", () => {
-          const selectedSubject = subjectDropdown.value;
-          const selectedPart = partDropdown.value;
-          quizDropdown.innerHTML = "<option>Select Quiz</option>";
-          iframe.src = "";
-          if (selectedPart !== "Select Part") {
-            loader.style.display = "block";
-            quizDropdown.disabled = false;
+    function loadSubjectDropdown(subjectList) {
+      document.getElementById("loadingText").style.display = "none";
+      const subjectDropdown = document.getElementById("subjectDropdown");
+      subjectDropdown.innerHTML = '<option value="">Select Subject</option>';
+      subjectList.forEach(subject => {
+        const option = document.createElement("option");
+        option.value = subject.name;
+        option.textContent = subject.name;
+        subjectDropdown.appendChild(option);
+      });
+      document.getElementById("dropdowns").style.display = "flex";
+    }
 
-            // क्विज़ लोड करें
-            setTimeout(() => {
-              const quizzes = data[selectedSubject][selectedPart];
-              for (const quiz in quizzes) {
-                const option = document.createElement("option");
-                option.value = quizzes[quiz];
-                option.textContent = quiz;
-                quizDropdown.appendChild(option);
-              }
-              loader.style.display = "none";
-            }, 500);
-          }
+    function onSubjectChange() {
+      const subject = document.getElementById("subjectDropdown").value;
+      fetch(DATA_URL)
+        .then(response => response.json())
+        .then(data => {
+          const selectedSubject = data.subjects.find(s => s.name === subject);
+          loadChapterDropdown(selectedSubject ? selectedSubject.chapters : []);
         });
+    }
 
-        quizDropdown.addEventListener("change", () => {
-          const selectedQuiz = quizDropdown.value;
-          if (selectedQuiz !== "Select Quiz") {
-            iframe.src = selectedQuiz; // PDF फाइल का URL सेट करें
-          }
+    function loadChapterDropdown(chapterList) {
+      const chapterDropdown = document.getElementById("chapterDropdown");
+      chapterDropdown.innerHTML = '<option value="">Select Chapter</option>';
+      chapterList.forEach(chapter => {
+        const option = document.createElement("option");
+        option.value = chapter.name;
+        option.textContent = chapter.name;
+        chapterDropdown.appendChild(option);
+      });
+    }
+
+    function onChapterChange() {
+      const subject = document.getElementById("subjectDropdown").value;
+      const chapter = document.getElementById("chapterDropdown").value;
+      fetch(DATA_URL)
+        .then(response => response.json())
+        .then(data => {
+          const selectedSubject = data.subjects.find(s => s.name === subject);
+          const selectedChapter = selectedSubject.chapters.find(c => c.name === chapter);
+          loadPDFDropdown(selectedChapter ? selectedChapter.pdfs : []);
         });
-      })
-      .catch((error) => console.error("Error loading JSON:", error));
+    }
+
+    function loadPDFDropdown(pdfList) {
+      const pdfDropdown = document.getElementById("pdfDropdown");
+      pdfDropdown.innerHTML = '<option value="">Select PDF</option>';
+      pdfList.forEach(pdf => {
+        const option = document.createElement("option");
+        option.value = pdf;
+        option.textContent = pdf;
+        pdfDropdown.appendChild(option);
+      });
+    }
+
+    function viewPDF() {
+      const pdfName = document.getElementById("pdfDropdown").value;
+      if (pdfName) {
+        const pdfViewer = document.getElementById("pdfViewer");
+        pdfViewer.style.display = "block";
+        pdfViewer.innerHTML = `<center><iframe src="./${pdfName}" width="100%" height="700" style="border: none; overflow: auto;" oncontextmenu="return false;"></iframe></center>`;
+      }
+    }
   </script>
 </body>
 </html>
