@@ -150,7 +150,7 @@
 
   <script>
     const githubBaseURL = "https://softedge12.github.io/lessonpdftrial/subjects/";
-    const jsonURL = "https://softedge12.github.io/lessonpdftrial/data.json"; // Your JSON file URL
+    const jsonURL = "https://softedge12.github.io/lessonpdftrial/data.json"; // Updated to use data.json
 
     function startToView() {
       document.getElementById("loadingText").style.display = "block";
@@ -170,10 +170,11 @@
       var subjectDropdown = document.getElementById("subjectDropdown");
       subjectDropdown.innerHTML = '<option value="">Select Subject</option>';
 
-      Object.keys(data).forEach(function(subject) {
+      // Iterate through subjects in the JSON data
+      data.subjects.forEach(function(subject) {
         var option = document.createElement("option");
-        option.value = subject;
-        option.textContent = subject;
+        option.value = subject.name;
+        option.textContent = subject.name;
         subjectDropdown.appendChild(option);
       });
 
@@ -187,7 +188,7 @@
       fetch(jsonURL)
         .then(response => response.json())
         .then(data => {
-          const chapters = data[subject] ? Object.keys(data[subject]) : [];
+          const chapters = data.subjects.find(subj => subj.name === subject)?.chapters || [];
           loadChapterDropdown(chapters);
         });
     }
@@ -198,8 +199,8 @@
       chapterDropdown.innerHTML = '<option value="">Select Chapter</option>';
       chapterList.forEach(function(chapter) {
         var option = document.createElement("option");
-        option.value = chapter;
-        option.textContent = chapter;
+        option.value = chapter.name;
+        option.textContent = chapter.name;
         chapterDropdown.appendChild(option);
       });
     }
@@ -212,7 +213,9 @@
       fetch(jsonURL)
         .then(response => response.json())
         .then(data => {
-          const pdfs = data[subject] && data[subject][chapter] ? data[subject][chapter] : [];
+          const pdfs = data.subjects
+            .find(subj => subj.name === subject)
+            ?.chapters.find(chap => chap.name === chapter)?.pdfs || [];
           loadPDFDropdown(pdfs);
         });
     }
