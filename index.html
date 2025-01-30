@@ -39,7 +39,6 @@
     #pdfViewer {
       width: 90%;
       height: 90vh;
-      overflow-y: scroll;
       margin-top: 10px;
       border: 1px solid #ddd;
       background-color: #fff;
@@ -91,10 +90,6 @@
   </div>
 
   <div id="pdfViewer"></div>
-  <div id="downloadLink" style="display: none;"></div>
-
-  <!-- PDFObject Library -->
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.6/pdfobject.min.js"></script>
 
   <script>
     const githubBaseURL = "https://softedge12.github.io/lessonpdftrial/subjects/";
@@ -181,29 +176,22 @@
 
     function displayPDF(pdfUrl) {
       var pdfViewer = document.getElementById("pdfViewer");
-      var downloadLinkContainer = document.getElementById("downloadLink");
-      pdfViewer.innerHTML = ''; // Clear previous PDF content
-      downloadLinkContainer.style.display = "none"; // Hide download link
+      pdfViewer.innerHTML = ''; // Clear previous content
 
       if (pdfUrl) {
-        pdfViewer.style.display = "block";
-        
-        // Try to embed the PDF using PDFObject
-        var options = {
-          height: "100%",
-          width: "100%",
-          pdfOpenParams: { view: "FitH", pagemode: "none" }
-        };
-        
-        var isPDFObjectSupported = PDFObject.embed(pdfUrl, "#pdfViewer", options);
+        // Google Docs Viewer URL for embedding PDFs
+        var googleDocsUrl = `https://docs.google.com/viewer?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
 
-        // Check if the browser supports inline PDF viewing
-        if (!isPDFObjectSupported) {
-          downloadLinkContainer.style.display = "block";
-          downloadLinkContainer.innerHTML = `<a href="${pdfUrl}" download>Click here to download the PDF</a>`;
-        }
+        // Create an iframe to display the PDF through Google Docs Viewer
+        var iframe = document.createElement("iframe");
+        iframe.src = googleDocsUrl;
+        iframe.width = "100%";
+        iframe.height = "100%";
+        iframe.style.border = "none";
+
+        // Append iframe to the pdfViewer div
+        pdfViewer.appendChild(iframe);
       } else {
-        pdfViewer.style.display = "none";
         alert("PDF File Not Found!");
       }
     }
@@ -213,4 +201,4 @@
   </script>
 </body>
 </html>
-ram
+shyam
