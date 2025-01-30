@@ -188,6 +188,8 @@
         iframe.width = "100%";
         iframe.height = "100%";
         iframe.style.border = "none";
+        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms");
+        iframe.setAttribute("oncontextmenu", "return false;");
 
         // Append iframe to the pdfViewer div
         pdfViewer.appendChild(iframe);
@@ -201,4 +203,4 @@
   </script>
 </body>
 </html>
-shyam
+mohan
