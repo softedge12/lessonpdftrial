@@ -195,17 +195,18 @@
       }
     }
 
-   function renderPDF(pdfUrl, pdfViewer) {
+  function renderPDF(pdfUrl, pdfViewer) {
   pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
     pdfViewer.innerHTML = ''; // पहले का Canvas क्लियर करें
+
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
       pdf.getPage(pageNumber).then(function(page) {
         var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
         var viewport = page.getViewport({ scale: 1 });
 
-        // कैनवास को कंटेनर की चौड़ाई के अनुसार फिट करें
-        var scale = pdfViewer.clientWidth / viewport.width;
+        // बेहतर गुणवत्ता के लिए स्केलिंग
+        var scale = Math.min(2, pdfViewer.clientWidth / viewport.width); 
         viewport = page.getViewport({ scale: scale });
 
         canvas.height = viewport.height;
