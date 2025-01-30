@@ -206,7 +206,7 @@
         var viewport = page.getViewport({ scale: 1 });
 
         // बेहतर गुणवत्ता के लिए स्केलिंग
-        var scale = Math.min(2, pdfViewer.clientWidth / viewport.width); 
+        var scale = Math.min(3, pdfViewer.clientWidth / viewport.width); 
         viewport = page.getViewport({ scale: scale });
 
         canvas.height = viewport.height;
