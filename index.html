@@ -196,21 +196,26 @@
     }
 
   function renderPDF(pdfUrl, pdfViewer) {
-  pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+  pdfjsLib.getDocument(pdfUrl).promise.then(function (pdf) {
     pdfViewer.innerHTML = ''; // पहले का Canvas क्लियर करें
 
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-      pdf.getPage(pageNumber).then(function(page) {
+      pdf.getPage(pageNumber).then(function (page) {
         var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
         var viewport = page.getViewport({ scale: 1 });
 
-        // बेहतर गुणवत्ता के लिए स्केलिंग
-        var scale = Math.min(3, pdfViewer.clientWidth / viewport.width); 
+        // बेहतर गुणवत्ता के लिए डिवाइस पिक्सल रेश्यो के अनुसार स्केलिंग
+        var scaleFactor = window.devicePixelRatio || 1.5;
+        var scale = Math.min(2 * scaleFactor, pdfViewer.clientWidth / viewport.width);
         viewport = page.getViewport({ scale: scale });
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
+
+        // रेंडरिंग को बेहतर बनाने के लिए Image Smoothing बंद करें
+        context.imageSmoothingEnabled = false;
+
         pdfViewer.appendChild(canvas);
 
         var renderContext = {
@@ -220,7 +225,7 @@
         page.render(renderContext);
       });
     }
-  }).catch(function(error) {
+  }).catch(function (error) {
     alert("Error loading PDF: " + error.message);
   });
 }
