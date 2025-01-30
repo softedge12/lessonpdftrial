@@ -206,7 +206,7 @@
         var viewport = page.getViewport({ scale: 1 });
 
         // बेहतर गुणवत्ता के लिए डिवाइस पिक्सल रेश्यो के अनुसार स्केलिंग
-        var scaleFactor = window.devicePixelRatio || 1.5;
+        var scaleFactor = window.devicePixelRatio || 3;
         var scale = Math.min(2 * scaleFactor, pdfViewer.clientWidth / viewport.width);
         viewport = page.getViewport({ scale: scale });
 
