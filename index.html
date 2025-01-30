@@ -46,11 +46,6 @@
       position: relative;
     }
 
-    canvas {
-      display: block;
-      margin: 10px auto;
-    }
-
     .view-pdf-btn {
       background-color: #007bff;
       padding: 10px 20px;
@@ -97,7 +92,8 @@
 
   <div id="pdfViewer"></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- PDFObject Library -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.6/pdfobject.min.js"></script>
 
   <script>
     const githubBaseURL = "https://softedge12.github.io/lessonpdftrial/subjects/";
@@ -188,45 +184,20 @@
 
       if (pdfUrl) {
         pdfViewer.style.display = "block";
-        renderPDF(pdfUrl, pdfViewer);
+        var options = {
+          height: "100%",
+          width: "100%",
+          pdfOpenParams: { view: "FitH", pagemode: "none" }
+        };
+        PDFObject.embed(pdfUrl, "#pdfViewer", options);
       } else {
         pdfViewer.style.display = "none";
         alert("PDF File Not Found!");
       }
     }
 
-   function renderPDF(pdfUrl, pdfViewer) {
-  pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
-    pdfViewer.innerHTML = ''; // पहले का Canvas क्लियर करें
-    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-      pdf.getPage(pageNumber).then(function(page) {
-        var canvas = document.createElement('canvas');
-        var context = canvas.getContext('2d');
-        var viewport = page.getViewport({ scale: 1 });
-
-        // कैनवास को कंटेनर की चौड़ाई के अनुसार फिट करें
-        var scale = Math.min(pdfViewer.clientWidth / viewport.width, 3);
-        viewport = page.getViewport({ scale: scale });
-
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        pdfViewer.appendChild(canvas);
-
-        var renderContext = {
-          canvasContext: context,
-          viewport: viewport
-        };
-        page.render(renderContext);
-      });
-    }
-  }).catch(function(error) {
-    alert("Error loading PDF: " + error.message);
-  });
-}
-
-
     // Initialize Data Fetch
     fetchJSONData();
   </script>
 </body>
-</html> mera yah code perfect kaam kar rha bas pdf dhundhali dikh rahi  
+</html>
