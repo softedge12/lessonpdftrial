@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF Viewer with High-Quality Rendering</title>
+  <title>PDF Viewer with Scroll</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,7 +11,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      min-height: 100vh;
+      height: 100vh;
       background-color: #e0f7fa;
       margin: 0;
       padding: 0;
@@ -37,23 +37,18 @@
     }
 
     #pdfViewer {
-      width: 80%;
+      width: 90%;
       height: 90vh;
       overflow-y: scroll;
       margin-top: 10px;
       border: 1px solid #ddd;
       background-color: #fff;
       position: relative;
-      text-align: center;
     }
 
     canvas {
       display: block;
-      margin: 20px auto;
-      max-width: 100%;
-      height: auto;
-      image-rendering: crisp-edges;
-      image-rendering: pixelated;
+      margin: 10px auto;
     }
 
     .view-pdf-btn {
@@ -107,8 +102,6 @@
   <script>
     const githubBaseURL = "https://softedge12.github.io/lessonpdftrial/subjects/";
     const jsonURL = "https://softedge12.github.io/lessonpdftrial/data.json";
-    let currentScale = 1.5;
-    let currentPdfUrl = '';
 
     function fetchJSONData() {
       fetch(jsonURL)
@@ -185,8 +178,8 @@
         return;
       }
 
-      currentPdfUrl = `${githubBaseURL}${subject}/${chapter}/${pdfName}`;
-      displayPDF(currentPdfUrl);
+      var pdfUrl = `${githubBaseURL}${subject}/${chapter}/${pdfName}`;
+      displayPDF(pdfUrl);
     }
 
     function displayPDF(pdfUrl) {
@@ -195,48 +188,45 @@
 
       if (pdfUrl) {
         pdfViewer.style.display = "block";
-        renderPDF(pdfUrl, pdfViewer, currentScale);
+        renderPDF(pdfUrl, pdfViewer);
       } else {
         pdfViewer.style.display = "none";
         alert("PDF File Not Found!");
       }
     }
 
-    function renderPDF(pdfUrl, pdfViewer, scale) {
-      pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
-        pdfViewer.innerHTML = ''; // पहले का Canvas क्लियर करें
+   function renderPDF(pdfUrl, pdfViewer) {
+  pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+    pdfViewer.innerHTML = ''; // पहले का Canvas क्लियर करें
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+      pdf.getPage(pageNumber).then(function(page) {
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+        var viewport = page.getViewport({ scale: 1 });
 
-        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-          pdf.getPage(pageNumber).then(function(page) {
-            var canvas = document.createElement('canvas');
-            var context = canvas.getContext('2d');
-            var viewport = page.getViewport({ scale: scale });
-            var dpiAdjustment = window.devicePixelRatio || 1;
+        // कैनवास को कंटेनर की चौड़ाई के अनुसार फिट करें
+        var scale = Math.min(pdfViewer.clientWidth / viewport.width, 3);
+        viewport = page.getViewport({ scale: scale });
 
-            canvas.width = viewport.width * dpiAdjustment;
-            canvas.height = viewport.height * dpiAdjustment;
-            canvas.style.width = `${viewport.width}px`;
-            canvas.style.height = `${viewport.height}px`;
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        pdfViewer.appendChild(canvas);
 
-            context.scale(dpiAdjustment, dpiAdjustment);
-            context.imageSmoothingEnabled = false;
-
-            pdfViewer.appendChild(canvas);
-
-            var renderContext = {
-              canvasContext: context,
-              viewport: viewport
-            };
-            page.render(renderContext);
-          });
-        }
-      }).catch(function(error) {
-        alert("Error loading PDF: " + error.message);
+        var renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        };
+        page.render(renderContext);
       });
     }
+  }).catch(function(error) {
+    alert("Error loading PDF: " + error.message);
+  });
+}
+
 
     // Initialize Data Fetch
     fetchJSONData();
   </script>
 </body>
-</html>
+</html> mera yah code perfect kaam kar rha bas pdf dhundhali dikh rahi  
