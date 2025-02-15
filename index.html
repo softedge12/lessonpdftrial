@@ -36,32 +36,32 @@
       width: 200px;
     }
 
-  body, html {
+    body, html {
     margin: 0;
     padding: 0;
-    overflow: hidden; /* पूरी स्क्रीन पर फिट करने के लिए */
     height: 100%;
     width: 100%;
+    overflow: hidden;
   }
 
   #pdfViewer {
-    width: 100vw;  /* पूरी विंडो के बराबर चौड़ाई */
-    height: 100vh; /* पूरी विंडो के बराबर ऊंचाई */
-    border: none;
-    overflow: hidden; /* स्क्रॉल बार हटाने के लिए */
+    width: 100vw;
+    height: 100vh; /* पूरी स्क्रीन की ऊंचाई */
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: black; /* अगर कोई गैप हो तो ब्लैक दिखे */
   }
 
   #pdfViewer iframe {
-    width: 100vw; /* व्यू-पोर्ट के अनुसार चौड़ाई */
-    height: 100vh; /* पूरी स्क्रीन कवर करने के लिए */
-    display: block;
+    width: 100vw;
+    height: 100vh;
     border: none;
+    display: block;
     margin: 0;
     padding: 0;
   }
+
 
 
 
