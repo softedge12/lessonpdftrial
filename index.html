@@ -35,16 +35,8 @@
       border-radius: 5px;
       width: 200px;
     }
-html, body {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background-color: black; /* एक्स्ट्रा जगह को ब्लैक रखना */
-  display: flex;
-  flex-direction: column;
-}
 
- #pdfViewer {
+    #pdfViewer {
       margin-top: 20px;
       width: 100%;
       height: 700px;
@@ -52,15 +44,6 @@ html, body {
       margin-top: 50px;
       position: relative;
     }
-
-
-#pdfViewer iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
-}
-
 
     .view-pdf-btn {
       background-color: #007bff;
@@ -191,33 +174,29 @@ html, body {
       displayPDF(pdfUrl);
     }
 
-   function displayPDF(pdfUrl) {
-  var pdfViewer = document.getElementById("pdfViewer");
-  pdfViewer.innerHTML = ""; // पुराना PDF क्लियर करें
+    function displayPDF(pdfUrl) {
+      var pdfViewer = document.getElementById("pdfViewer");
+      pdfViewer.innerHTML = ''; // Clear previous content
 
-  if (pdfUrl) {
-    var googleDocsUrl = `https://docs.google.com/viewer?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
+      if (pdfUrl) {
+        // Google Docs Viewer URL for embedding PDFs
+        var googleDocsUrl = `https://docs.google.com/viewer?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
 
-    var iframe = document.createElement("iframe");
-    iframe.src = googleDocsUrl;
-    iframe.style.width = "100%";
-    iframe.style.height = "100%";
-    iframe.style.border = "none";
+        // Create an iframe to display the PDF through Google Docs Viewer
+        var iframe = document.createElement("iframe");
+        iframe.src = googleDocsUrl;
+        iframe.width = "100%";
+        iframe.height = "100%";
+        iframe.style.border = "none";
+        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms");
+        iframe.setAttribute("oncontextmenu", "return false;");
 
-    // "Pop Out" और "Download" रोकने के लिए Sandbox सेट करें
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms"); 
-    iframe.setAttribute("oncontextmenu", "return false;"); // राइट-क्लिक ब्लॉक
-
-    pdfViewer.appendChild(iframe);
-  } else {
-    alert("PDF File Not Found!");
-  }
-}
-
-
-
-
-
+        // Append iframe to the pdfViewer div
+        pdfViewer.appendChild(iframe);
+      } else {
+        alert("PDF File Not Found!");
+      }
+    }
 
     // Initialize Data Fetch
     fetchJSONData();
